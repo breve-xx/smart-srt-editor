@@ -1,0 +1,14 @@
+package ui
+
+import (
+    "mime/multipart"
+    "github.com/martinlindhe/subtitles"
+)
+
+templ Listing(file *multipart.FileHeader, subs *subtitles.Subtitle) {
+    <h1>Listing</h1>
+    <p>Here is the file you requested:</p>
+    <pre>{ file.Filename }</pre>
+    <p>Here are the subtitles:</p>
+    <pre>{ subs.AsSRT() }</pre>
+}
