@@ -1,19 +1,16 @@
 package ui
 
 import (
-    "mime/multipart"
-    "github.com/martinlindhe/subtitles"
+    "dev.codecrunchiness/smart-srt-editor/internal/editor/ctx"
 	"strings"
 	"strconv"
 )
 
-templ Listing(file *multipart.FileHeader, subs *subtitles.Subtitle) {
+templ Listing(session *ctx.Session) {
     <h1>Listing</h1>
     <p>Here is the file you requested:</p>
-    <pre>{ file.Filename }</pre>
-    <form action="/download" method="post">
-        <button type="submit">Download Edited Subtitles</button>
-    </form>
+    <pre>{ session.File.Filename }</pre>
+    <button onclick={ templ.JSFuncCall("download", session.ID) }>Download Edited Subtitles</button>
     <table>
         <thead>
             <tr>
@@ -25,7 +22,7 @@ templ Listing(file *multipart.FileHeader, subs *subtitles.Subtitle) {
             </tr>
         </thead>
         <tbody>
-            for _, sub := range subs.Captions {
+            for _, sub := range session.Subs.Captions {
                 <tr>
                     <td>{ strconv.Itoa(sub.Seq) }</td>
                     <td>{ sub.Start.String() }</td>
@@ -35,4 +32,25 @@ templ Listing(file *multipart.FileHeader, subs *subtitles.Subtitle) {
             }
         </tbody>
     </table>
+    <script>
+        function download(sessionID) {
+            fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${sessionID}`,
+                }
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'edited.srt';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
+    </script>
 }
