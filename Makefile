@@ -10,6 +10,7 @@ build:
 	@$(GO) build -o bin/$(APP_NAME) cmd/$(APP_NAME)/main.go
 
 clean:
+	@rm internal/$(APP_NAME)/ui/*.go
 	@rm -rf bin
 
 generate:
@@ -24,6 +25,6 @@ docker-build:
 docker-run:
 	@$(DOCKER) run --rm -p 8080:8080 smart-srt-editor:local
 
-all: dependencies
+all: generate
 
 .PHONY: dependencies build clean generate run docker-build docker-run all

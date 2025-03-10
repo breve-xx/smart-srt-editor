@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"dev.codecrunchiness/smart-srt-editor/internal/ui"
+	"dev.codecrunchiness/smart-srt-editor/internal/editor/ui"
 	"github.com/martinlindhe/subtitles"
 )
 
