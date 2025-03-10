@@ -3,12 +3,36 @@ package ui
 import (
     "mime/multipart"
     "github.com/martinlindhe/subtitles"
+	"strings"
+	"strconv"
 )
 
 templ Listing(file *multipart.FileHeader, subs *subtitles.Subtitle) {
     <h1>Listing</h1>
     <p>Here is the file you requested:</p>
     <pre>{ file.Filename }</pre>
-    <p>Here are the subtitles:</p>
-    <pre>{ subs.AsSRT() }</pre>
+    <form action="/download" method="post">
+        <button type="submit">Download Edited Subtitles</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Old</th>
+                <th>New</th>
+            </tr>
+        </thead>
+        <tbody>
+            for _, sub := range subs.Captions {
+                <tr>
+                    <td>{ strconv.Itoa(sub.Seq) }</td>
+                    <td>{ sub.Start.String() }</td>
+                    <td>{ sub.End.String() }</td>
+                    <td>{ strings.Join(sub.Text, "#separator#") }</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }

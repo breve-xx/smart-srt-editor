@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	var subs subtitles.Subtitle
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		component := ui.UploadPage()
 		component.Render(context.Background(), w)
@@ -34,7 +36,7 @@ func main() {
 			return
 		}
 
-		subs, err := subtitles.Parse(buf.Bytes())
+		subs, err = subtitles.Parse(buf.Bytes())
 		if err != nil {
 			http.Error(w, "Error parsing file", http.StatusInternalServerError)
 			return
@@ -42,6 +44,14 @@ func main() {
 
 		component := ui.Listing(handler, &subs)
 		component.Render(context.Background(), w)
+	})
+
+	http.HandleFunc("/download", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Downloading file")
+
+		w.Header().Set("Content-Disposition", "attachment; filename=edited.srt")
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Write([]byte(subs.AsSRT()))
 	})
 
 	log.Println("Server started on port 8080")
