@@ -19,15 +19,18 @@ templ Listing(session *ctx.Session) {
                 <th>End</th>
                 <th>Old</th>
                 <th>New</th>
+                <th>Edit</th>
             </tr>
         </thead>
         <tbody>
-            for _, sub := range session.Subs.Captions {
+            for index, sub := range session.Subs.Captions {
                 <tr>
                     <td>{ strconv.Itoa(sub.Seq) }</td>
                     <td>{ sub.Start.String() }</td>
                     <td>{ sub.End.String() }</td>
                     <td>{ strings.Join(sub.Text, "#separator#") }</td>
+                    <td><textarea /></td>
+                    <td><button onclick={ templ.JSFuncCall("save", session.ID, sub.Seq, index) }>Save</button></td>
                 </tr>
             }
         </tbody>
@@ -35,7 +38,7 @@ templ Listing(session *ctx.Session) {
     <script>
         function download(sessionID) {
             fetch('/download', {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${sessionID}`,
                 }
@@ -49,7 +52,22 @@ templ Listing(session *ctx.Session) {
                 a.download = 'edited.srt';
                 document.body.appendChild(a);
                 a.click();
+                a.remove();
                 window.URL.revokeObjectURL(url);
+            });
+        }
+
+        function save(sessionID, seq, index) {
+            fetch(`/edit/${index}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${sessionID}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    seq: seq,
+                    text: ["new", "text"],
+                }),
             });
         }
     </script>
