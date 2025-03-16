@@ -12,11 +12,3 @@ type Session struct {
 	File *multipart.FileHeader
 	Subs *subtitles.Subtitle
 }
-
-func NewSession(ID uuid.UUID, file *multipart.FileHeader, subs *subtitles.Subtitle) *Session {
-	return &Session{
-		ID:   ID,
-		File: file,
-		Subs: subs,
-	}
-}

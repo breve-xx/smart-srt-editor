@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"sync"
 	"time"
 
 	"dev.codecrunchiness/smart-srt-editor/internal/editor/ctx"
@@ -20,7 +19,6 @@ import (
 
 var (
 	sessions = make(map[uuid.UUID]*ctx.Session)
-	mu       = sync.RWMutex{}
 )
 
 type EditedCaption struct {
@@ -64,9 +62,12 @@ func main() {
 			http.Error(w, "Error creating session", http.StatusInternalServerError)
 			return
 		}
-		mu.Lock()
-		sessions[sessionID] = ctx.NewSession(sessionID, handler, &subs)
-		mu.Unlock()
+
+		sessions[sessionID] = &ctx.Session{
+			ID:   sessionID,
+			File: handler,
+			Subs: &subs,
+		}
 
 		w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", sessionID.String()))
 
@@ -89,9 +90,7 @@ func main() {
 			return
 		}
 
-		mu.Lock()
 		session, exists := sessions[sessionID]
-		mu.Unlock()
 
 		if !exists {
 			http.Error(w, "Session not found", http.StatusNotFound)
@@ -118,9 +117,7 @@ func main() {
 			return
 		}
 
-		mu.Lock()
 		session, exists := sessions[sessionID]
-		mu.Unlock()
 
 		if !exists {
 			http.Error(w, "Session not found", http.StatusNotFound)
